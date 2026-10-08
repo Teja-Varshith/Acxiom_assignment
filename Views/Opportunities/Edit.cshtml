@@ -1,0 +1,101 @@
+@model axciom.Models.Opportunity
+@{
+    ViewData["Title"] = "Edit Opportunity";
+}
+
+<div class="d-flex align-items-center justify-content-between pb-3 mb-4 border-bottom">
+    <div>
+        <h3 class="fw-bold mb-1"><i class="bi bi-pencil-square text-primary me-2"></i> Edit Opportunity</h3>
+        <p class="text-muted small mb-0">Update opportunity <strong>@Model.OpportunityName</strong></p>
+    </div>
+    <a href="@Url.Action("Index")" class="btn btn-outline-secondary btn-sm"><i class="bi bi-arrow-left me-1"></i> Back to List</a>
+</div>
+
+<div class="card border-0 shadow-sm max-w-700">
+    <div class="card-body p-4">
+        <form asp-action="Edit" method="post">
+            <input type="hidden" asp-for="OpportunityId" />
+            <div asp-validation-summary="ModelOnly" class="alert alert-danger py-2 small border-0" role="alert"></div>
+
+            <div class="row g-3">
+                <div class="col-md-12">
+                    <label asp-for="OpportunityName" class="form-label fw-semibold small">Opportunity Title <span class="text-danger">*</span></label>
+                    <input asp-for="OpportunityName" class="form-control" />
+                    <span asp-validation-for="OpportunityName" class="text-danger small"></span>
+                </div>
+
+                <div class="col-md-6">
+                    <label asp-for="CustomerId" class="form-label fw-semibold small">Associated Customer</label>
+                    <select asp-for="CustomerId" class="form-select" asp-items="ViewBag.CustomerId">
+                        <option value="">-- Select Customer --</option>
+                    </select>
+                </div>
+
+                <div class="col-md-6">
+                    <label asp-for="LeadId" class="form-label fw-semibold small">Associated Lead</label>
+                    <select asp-for="LeadId" class="form-select" asp-items="ViewBag.LeadId">
+                        <option value="">-- Select Lead --</option>
+                    </select>
+                </div>
+
+                <div class="col-md-6">
+                    <label asp-for="Amount" class="form-label fw-semibold small">Deal Amount ($) <span class="text-danger">* (> 0)</span></label>
+                    <input asp-for="Amount" class="form-control" type="number" step="0.01" />
+                    <span asp-validation-for="Amount" class="text-danger small"></span>
+                </div>
+
+                <div class="col-md-6">
+                    <label asp-for="Probability" class="form-label fw-semibold small">Win Probability % <span class="text-danger">* (0 - 100)</span></label>
+                    <input asp-for="Probability" class="form-control" type="number" min="0" max="100" />
+                    <span asp-validation-for="Probability" class="text-danger small"></span>
+                </div>
+
+                <div class="col-md-4">
+                    <label asp-for="Stage" class="form-label fw-semibold small">Pipeline Stage</label>
+                    <select asp-for="Stage" class="form-select">
+                        <option value="Qualification">Qualification</option>
+                        <option value="Proposal">Proposal</option>
+                        <option value="Negotiation">Negotiation</option>
+                        <option value="Won">Won</option>
+                        <option value="Lost">Lost</option>
+                    </select>
+                </div>
+
+                <div class="col-md-4">
+                    <label asp-for="ExpectedCloseDate" class="form-label fw-semibold small">Expected Close Date <span class="text-danger">*</span></label>
+                    <input asp-for="ExpectedCloseDate" class="form-control" type="date" value="@Model.ExpectedCloseDate.ToString("yyyy-MM-dd")" />
+                    <span asp-validation-for="ExpectedCloseDate" class="text-danger small"></span>
+                </div>
+
+                <div class="col-md-4">
+                    <label asp-for="Status" class="form-label fw-semibold small">Status</label>
+                    <select asp-for="Status" class="form-select">
+                        <option value="Active">Active</option>
+                        <option value="Closed">Closed</option>
+                    </select>
+                </div>
+
+                <div class="col-md-6">
+                    <label asp-for="OwnerId" class="form-label fw-semibold small">Assigned Sales Owner</label>
+                    <select asp-for="OwnerId" class="form-select" asp-items="ViewBag.OwnerId">
+                        <option value="">-- Select Owner --</option>
+                    </select>
+                </div>
+
+                <div class="col-md-12">
+                    <label asp-for="Notes" class="form-label fw-semibold small">Notes / Scope Details</label>
+                    <textarea asp-for="Notes" class="form-control" rows="2"></textarea>
+                </div>
+
+                <div class="col-md-12 mt-4 pt-3 border-top d-flex gap-2">
+                    <button type="submit" class="btn btn-primary fw-semibold px-4"><i class="bi bi-save me-1"></i> Update Opportunity</button>
+                    <a href="@Url.Action("Index")" class="btn btn-light px-4">Cancel</a>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

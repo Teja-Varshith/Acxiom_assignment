@@ -1,0 +1,177 @@
+@model IEnumerable<axciom.Models.Lead>
+@{
+    ViewData["Title"] = "Lead Management";
+}
+
+<div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between pb-3 mb-4 border-bottom">
+    <div>
+        <h3 class="fw-bold mb-1"><i class="bi bi-person-lines-fill text-primary me-2"></i> Lead Management</h3>
+        <p class="text-muted small mb-0">Capture prospective leads, manage qualification status workflows, and convert into active customers.</p>
+    </div>
+    <div class="mt-3 mt-md-0">
+        <a href="@Url.Action("Create")" class="btn btn-primary fw-semibold shadow-sm">
+            <i class="bi bi-plus-lg me-1"></i> Capture New Lead
+        </a>
+    </div>
+</div>
+
+<!-- Search & Filter Controls -->
+<div class="card border-0 shadow-sm mb-4">
+    <div class="card-body p-3">
+        <form method="get" asp-action="Index" class="row g-2 align-items-center">
+            <div class="col-md-4">
+                <div class="input-group input-group-sm">
+                    <span class="input-group-text bg-light text-muted"><i class="bi bi-search"></i></span>
+                    <input type="text" name="searchTerm" value="@ViewBag.SearchTerm" class="form-control" placeholder="Search by name, email, phone, company..." />
+                </div>
+            </div>
+            <div class="col-md-3">
+                <select name="statusFilter" class="form-select form-select-sm">
+                    <option value="">-- All Statuses --</option>
+                    <option value="New" selected="@(ViewBag.StatusFilter == "New")">New</option>
+                    <option value="Contacted" selected="@(ViewBag.StatusFilter == "Contacted")">Contacted</option>
+                    <option value="Qualified" selected="@(ViewBag.StatusFilter == "Qualified")">Qualified</option>
+                    <option value="Unqualified" selected="@(ViewBag.StatusFilter == "Unqualified")">Unqualified</option>
+                    <option value="Converted" selected="@(ViewBag.StatusFilter == "Converted")">Converted</option>
+                    <option value="Lost" selected="@(ViewBag.StatusFilter == "Lost")">Lost</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <select name="sourceFilter" class="form-select form-select-sm">
+                    <option value="">-- All Sources --</option>
+                    <option value="Web" selected="@(ViewBag.SourceFilter == "Web")">Web</option>
+                    <option value="Referral" selected="@(ViewBag.SourceFilter == "Referral")">Referral</option>
+                    <option value="Cold Call" selected="@(ViewBag.SourceFilter == "Cold Call")">Cold Call</option>
+                    <option value="Tradeshow" selected="@(ViewBag.SourceFilter == "Tradeshow")">Tradeshow</option>
+                </select>
+            </div>
+            <div class="col-md-2 d-flex gap-2">
+                <button type="submit" class="btn btn-sm btn-primary px-3 fw-semibold"><i class="bi bi-funnel-fill me-1"></i> Filter</button>
+                <a href="@Url.Action("Index")" class="btn btn-sm btn-outline-secondary px-3">Reset</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Leads Data Table -->
+<div class="card border-0 shadow-sm">
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th>Code</th>
+                    <th>Lead Name</th>
+                    <th>Email & Phone</th>
+                    <th>Source</th>
+                    <th>Priority</th>
+                    <th>Expected Value</th>
+                    <th>Status</th>
+                    <th>Owner</th>
+                    <th class="text-end">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (!Model.Any())
+                {
+                    <tr>
+                        <td colspan="9" class="text-center py-4 text-muted">
+                            <i class="bi bi-inbox fs-3 d-block mb-1"></i>
+                            No lead records found matching your query.
+                        </td>
+                    </tr>
+                }
+                else
+                {
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            <td><span class="badge bg-light text-dark font-monospace">@item.LeadCode</span></td>
+                            <td class="fw-semibold">
+                                @item.LeadName
+                                @if (!string.IsNullOrEmpty(item.CompanyName))
+                                {
+                                    <div class="small text-muted fw-normal">@item.CompanyName</div>
+                                }
+                            </td>
+                            <td>
+                                <div><a href="mailto:@item.Email" class="text-decoration-none small">@item.Email</a></div>
+                                <div class="small text-muted font-monospace">@item.Phone</div>
+                            </td>
+                            <td><span class="badge bg-light text-dark">@item.Source</span></td>
+                            <td>
+                                @if (item.Priority == "High")
+                                {
+                                    <span class="badge bg-danger-subtle text-danger">High</span>
+                                }
+                                else if (item.Priority == "Medium")
+                                {
+                                    <span class="badge bg-warning-subtle text-warning">Medium</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-secondary-subtle text-secondary">Low</span>
+                                }
+                            </td>
+                            <td class="fw-bold text-success">@item.ExpectedValue.ToString("C0")</td>
+                            <td>
+                                @if (item.Status == "Converted")
+                                {
+                                    <span class="badge bg-success-subtle text-success border border-success-subtle"><i class="bi bi-check-all me-1"></i> Converted</span>
+                                }
+                                else if (item.Status == "Qualified")
+                                {
+                                    <span class="badge bg-primary-subtle text-primary border border-primary-subtle">Qualified</span>
+                                }
+                                else if (item.Status == "Contacted")
+                                {
+                                    <span class="badge bg-info-subtle text-info">Contacted</span>
+                                }
+                                else if (item.Status == "Lost")
+                                {
+                                    <span class="badge bg-danger-subtle text-danger">Lost</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-warning-subtle text-warning">New</span>
+                                }
+                            </td>
+                            <td class="small">@(item.Owner?.FullName ?? "Unassigned")</td>
+                            <td class="text-end">
+                                <div class="btn-group btn-group-sm">
+                                    @if (item.Status == "Qualified" || item.Status == "New" || item.Status == "Contacted")
+                                    {
+                                        <a href="@Url.Action("Convert", new { id = item.LeadId })" class="btn btn-success fw-semibold" title="Convert Lead to Customer"><i class="bi bi-arrow-right-circle me-1"></i> Convert</a>
+                                    }
+                                    <a href="@Url.Action("Edit", new { id = item.LeadId })" class="btn btn-outline-primary" title="Edit Lead"><i class="bi bi-pencil"></i></a>
+                                    <button type="button" class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteModal-@item.LeadId" title="Delete"><i class="bi bi-trash"></i></button>
+                                </div>
+
+                                <!-- Delete Confirmation Modal -->
+                                <div class="modal fade text-start" id="deleteModal-@item.LeadId" tabindex="-1">
+                                    <div class="modal-dialog modal-dialog-centered">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title fw-bold text-danger"><i class="bi bi-exclamation-triangle-fill me-2"></i> Delete Lead</h5>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                            </div>
+                                            <div class="modal-body">
+                                                Are you sure you want to delete lead <strong>@item.LeadName</strong>?
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
+                                                <form asp-action="Delete" asp-route-id="@item.LeadId" method="post">
+                                                    @Html.AntiForgeryToken()
+                                                    <button type="submit" class="btn btn-danger">Confirm Delete</button>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

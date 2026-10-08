@@ -1,0 +1,224 @@
+@model axciom.ViewModels.DashboardViewModel
+@{
+    ViewData["Title"] = "Executive Dashboard";
+}
+
+<div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between pb-3 mb-4 border-bottom">
+    <div>
+        <h3 class="fw-bold mb-1"><i class="bi bi-speedometer2 text-primary me-2"></i> Executive Sales Dashboard</h3>
+        <p class="text-muted small mb-0">Role-scoped real-time KPIs, sales pipeline metrics, and conversion analytics.</p>
+    </div>
+    <!-- Date Filter Pills -->
+    <div class="mt-3 mt-md-0">
+        <div class="btn-group shadow-sm" role="group">
+            <a href="@Url.Action("Index", new { dateRange = "Today" })" class="btn btn-sm btn-outline-secondary @(Model.DateRangeFilter == "Today" ? "active" : "")">Today</a>
+            <a href="@Url.Action("Index", new { dateRange = "ThisWeek" })" class="btn btn-sm btn-outline-secondary @(Model.DateRangeFilter == "ThisWeek" ? "active" : "")">This Week</a>
+            <a href="@Url.Action("Index", new { dateRange = "ThisMonth" })" class="btn btn-sm btn-outline-secondary @(Model.DateRangeFilter == "ThisMonth" ? "active" : "")">This Month</a>
+            <a href="@Url.Action("Index", new { dateRange = "AllTime" })" class="btn btn-sm btn-outline-secondary @(Model.DateRangeFilter == "AllTime" ? "active" : "")">All Time</a>
+        </div>
+    </div>
+</div>
+
+<!-- KPI Metric Cards Grid -->
+<div class="row g-3 mb-4">
+    <div class="col-6 col-md-3">
+        <div class="card border-0 bg-white shadow-sm p-3">
+            <div class="d-flex align-items-center justify-content-between">
+                <div>
+                    <span class="text-muted small text-uppercase fw-semibold">Total Customers</span>
+                    <h3 class="fw-bold text-dark my-1">@Model.TotalCustomers</h3>
+                    <span class="text-success small"><i class="bi bi-person-check-fill me-1"></i> Active Scope</span>
+                </div>
+                <div class="bg-primary-subtle text-primary p-3 rounded-circle fs-3">
+                    <i class="bi bi-building"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-6 col-md-3">
+        <div class="card border-0 bg-white shadow-sm p-3">
+            <div class="d-flex align-items-center justify-content-between">
+                <div>
+                    <span class="text-muted small text-uppercase fw-semibold">Total Leads</span>
+                    <h3 class="fw-bold text-dark my-1">@Model.TotalLeads</h3>
+                    <span class="text-info small"><strong>@Model.OpenLeads</strong> Open</span>
+                </div>
+                <div class="bg-info-subtle text-info p-3 rounded-circle fs-3">
+                    <i class="bi bi-person-lines-fill"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-6 col-md-3">
+        <div class="card border-0 bg-white shadow-sm p-3">
+            <div class="d-flex align-items-center justify-content-between">
+                <div>
+                    <span class="text-muted small text-uppercase fw-semibold">Total Opportunities</span>
+                    <h3 class="fw-bold text-dark my-1">@Model.TotalOpportunities</h3>
+                    <span class="text-warning small"><strong>@Model.OpenOpportunities</strong> Active</span>
+                </div>
+                <div class="bg-warning-subtle text-warning p-3 rounded-circle fs-3">
+                    <i class="bi bi-briefcase-fill"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-6 col-md-3">
+        <div class="card border-0 bg-white shadow-sm p-3">
+            <div class="d-flex align-items-center justify-content-between">
+                <div>
+                    <span class="text-muted small text-uppercase fw-semibold">Pipeline Value</span>
+                    <h3 class="fw-bold text-success my-1">@Model.TotalPipelineValue.ToString("C0")</h3>
+                    <span class="text-success small">Open Opportunities</span>
+                </div>
+                <div class="bg-success-subtle text-success p-3 rounded-circle fs-3">
+                    <i class="bi bi-cash-stack"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Secondary KPI Row (Won vs Lost) -->
+<div class="row g-3 mb-4">
+    <div class="col-6 col-md-3">
+        <div class="card border-start border-4 border-success bg-white shadow-sm p-3">
+            <span class="text-muted small fw-semibold">Won Opportunities</span>
+            <h4 class="fw-bold text-success mt-1 mb-0">@Model.WonOpportunities</h4>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="card border-start border-4 border-danger bg-white shadow-sm p-3">
+            <span class="text-muted small fw-semibold">Lost Opportunities</span>
+            <h4 class="fw-bold text-danger mt-1 mb-0">@Model.LostOpportunities</h4>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="card border-start border-4 border-primary bg-white shadow-sm p-3">
+            <span class="text-muted small fw-semibold">Open Leads Ratio</span>
+            <h4 class="fw-bold text-primary mt-1 mb-0">@(Model.TotalLeads > 0 ? (Model.OpenLeads * 100 / Model.TotalLeads) : 0)%</h4>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="card border-start border-4 border-info bg-white shadow-sm p-3">
+            <span class="text-muted small fw-semibold">Win Rate Ratio</span>
+            <h4 class="fw-bold text-info mt-1 mb-0">@(Model.TotalOpportunities > 0 ? (Model.WonOpportunities * 100 / Model.TotalOpportunities) : 0)%</h4>
+        </div>
+    </div>
+</div>
+
+<!-- Chart.js Visualization Grid -->
+<div class="row g-4">
+    <!-- Chart 1: Lead Status Breakdown -->
+    <div class="col-md-4">
+        <div class="card shadow-sm border-0 h-100">
+            <div class="card-header bg-white border-0 py-3">
+                <h6 class="fw-bold mb-0 text-dark"><i class="bi bi-pie-chart-fill text-primary me-2"></i> Lead Status Distribution</h6>
+            </div>
+            <div class="card-body d-flex align-items-center justify-content-center p-3">
+                <canvas id="leadStatusChart" style="max-height: 250px;"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Chart 2: Opportunity Pipeline Stage -->
+    <div class="col-md-8">
+        <div class="card shadow-sm border-0 h-100">
+            <div class="card-header bg-white border-0 py-3">
+                <h6 class="fw-bold mb-0 text-dark"><i class="bi bi-bar-chart-line-fill text-success me-2"></i> Opportunity Pipeline Amounts by Stage</h6>
+            </div>
+            <div class="card-body p-3">
+                <canvas id="pipelineStageChart" style="max-height: 250px;"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Chart 3: Monthly Sales Trends -->
+    <div class="col-12">
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-white border-0 py-3">
+                <h6 class="fw-bold mb-0 text-dark"><i class="bi bi-graph-up text-info me-2"></i> Monthly Sales & Outcome Trends</h6>
+            </div>
+            <div class="card-body p-3">
+                <canvas id="monthlySalesChart" style="max-height: 280px;"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        // Chart 1: Lead Status Doughnut Chart
+        const leadStatusCtx = document.getElementById('leadStatusChart').getContext('2d');
+        new Chart(leadStatusCtx, {
+            type: 'doughnut',
+            data: {
+                labels: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.LeadStatusLabels)),
+                datasets: [{
+                    data: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.LeadStatusCounts)),
+                    backgroundColor: ['#3b82f6', '#06b6d4', '#10b981', '#f59e0b', '#8b5cf6', '#ef4444'],
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: { position: 'bottom' }
+                }
+            }
+        });
+
+        // Chart 2: Opportunity Pipeline Bar Chart
+        const pipelineStageCtx = document.getElementById('pipelineStageChart').getContext('2d');
+        new Chart(pipelineStageCtx, {
+            type: 'bar',
+            data: {
+                labels: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.PipelineStageLabels)),
+                datasets: [{
+                    label: 'Pipeline Value ($)',
+                    data: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.PipelineStageAmounts)),
+                    backgroundColor: '#3b82f6',
+                    borderRadius: 6
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: { beginAtZero: true }
+                },
+                plugins: {
+                    legend: { display: false }
+                }
+            }
+        });
+
+        // Chart 3: Monthly Sales Line Chart
+        const monthlySalesCtx = document.getElementById('monthlySalesChart').getContext('2d');
+        new Chart(monthlySalesCtx, {
+            type: 'line',
+            data: {
+                labels: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.MonthlySalesLabels)),
+                datasets: [{
+                    label: 'Closed Won Sales ($)',
+                    data: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.MonthlySalesValues)),
+                    borderColor: '#10b981',
+                    backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                    fill: true,
+                    tension: 0.3,
+                    pointRadius: 5
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: { beginAtZero: true }
+                }
+            }
+        });
+    });
+</script>
+}

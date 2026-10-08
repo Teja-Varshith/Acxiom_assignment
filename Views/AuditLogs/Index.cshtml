@@ -1,0 +1,117 @@
+@model IEnumerable<axciom.Models.AuditLog>
+@{
+    ViewData["Title"] = "Security & Business Audit Logs";
+}
+
+<div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between pb-3 mb-4 border-bottom">
+    <div>
+        <h3 class="fw-bold mb-1"><i class="bi bi-file-earmark-text-fill text-primary me-2"></i> Security & Business Audit Logs</h3>
+        <p class="text-muted small mb-0">Append-only immutable record of all security events, authentication logs, and data CRUD operations.</p>
+    </div>
+</div>
+
+<!-- Search & Filter Bar -->
+<div class="card border-0 shadow-sm mb-4">
+    <div class="card-body p-3">
+        <form method="get" asp-action="Index" class="row g-2 align-items-center">
+            <div class="col-md-3">
+                <input type="text" name="searchTerm" value="@ViewBag.SearchTerm" class="form-control form-control-sm" placeholder="Search user, record ID, or details..." />
+            </div>
+            <div class="col-md-2">
+                <select name="entityFilter" class="form-select form-select-sm">
+                    <option value="">-- All Modules --</option>
+                    <option value="Auth" selected="@(ViewBag.EntityFilter == "Auth")">Auth</option>
+                    <option value="User" selected="@(ViewBag.EntityFilter == "User")">User</option>
+                    <option value="Customer" selected="@(ViewBag.EntityFilter == "Customer")">Customer</option>
+                    <option value="Lead" selected="@(ViewBag.EntityFilter == "Lead")">Lead</option>
+                    <option value="Opportunity" selected="@(ViewBag.EntityFilter == "Opportunity")">Opportunity</option>
+                    <option value="FollowUp" selected="@(ViewBag.EntityFilter == "FollowUp")">FollowUp</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <input type="date" name="startDate" value="@ViewBag.StartDate" class="form-control form-control-sm" title="Start Date" />
+            </div>
+            <div class="col-md-2">
+                <input type="date" name="endDate" value="@ViewBag.EndDate" class="form-control form-control-sm" title="End Date" />
+            </div>
+            <div class="col-md-3 d-flex gap-2">
+                <button type="submit" class="btn btn-sm btn-primary px-3 fw-semibold"><i class="bi bi-funnel-fill me-1"></i> Filter Audit</button>
+                <a href="@Url.Action("Index")" class="btn btn-sm btn-outline-secondary px-3">Reset</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Audit Log Table -->
+<div class="card border-0 shadow-sm">
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0 font-monospace" style="font-size: 0.85rem;">
+            <thead class="table-light">
+                <tr>
+                    <th>Timestamp</th>
+                    <th>User</th>
+                    <th>Action</th>
+                    <th>Module</th>
+                    <th>Record ID</th>
+                    <th>Result</th>
+                    <th>Details</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (!Model.Any())
+                {
+                    <tr>
+                        <td colspan="7" class="text-center py-4 text-muted font-sans-serif">
+                            No audit log records found matching specified parameters.
+                        </td>
+                    </tr>
+                }
+                else
+                {
+                    @foreach (var log in Model)
+                    {
+                        <tr>
+                            <td class="text-muted">@log.Timestamp.ToString("yyyy-MM-dd HH:mm:ss")</td>
+                            <td class="fw-semibold text-dark">@log.UserName</td>
+                            <td>
+                                @if (log.Action.Contains("Login") || log.Action.Contains("Auth"))
+                                {
+                                    <span class="badge bg-primary-subtle text-primary border">@log.Action</span>
+                                }
+                                else if (log.Action.Contains("Create") || log.Action.Contains("Convert"))
+                                {
+                                    <span class="badge bg-success-subtle text-success border">@log.Action</span>
+                                }
+                                else if (log.Action.Contains("Delete"))
+                                {
+                                    <span class="badge bg-danger-subtle text-danger border">@log.Action</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-secondary-subtle text-secondary border">@log.Action</span>
+                                }
+                            </td>
+                            <td><span class="badge bg-light text-dark">@log.EntityName</span></td>
+                            <td class="text-muted">@(string.IsNullOrEmpty(log.RecordId) ? "-" : log.RecordId)</td>
+                            <td>
+                                @if (log.Result == "Success")
+                                {
+                                    <span class="badge bg-success">Success</span>
+                                }
+                                else if (log.Result == "LockedOut")
+                                {
+                                    <span class="badge bg-warning text-dark">LockedOut</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-danger">@log.Result</span>
+                                }
+                            </td>
+                            <td class="text-truncate" style="max-width: 300px;" title="@log.Details">@log.Details</td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

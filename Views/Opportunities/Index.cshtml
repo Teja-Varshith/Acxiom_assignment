@@ -1,0 +1,152 @@
+@model IEnumerable<axciom.Models.Opportunity>
+@{
+    ViewData["Title"] = "Opportunity Management";
+}
+
+<div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between pb-3 mb-4 border-bottom">
+    <div>
+        <h3 class="fw-bold mb-1"><i class="bi bi-briefcase-fill text-primary me-2"></i> Opportunity Pipeline Management</h3>
+        <p class="text-muted small mb-0">Track active sales deals, stage progression, weighted pipeline values, and expected close dates.</p>
+    </div>
+    <div class="mt-3 mt-md-0">
+        <a href="@Url.Action("Create")" class="btn btn-primary fw-semibold shadow-sm">
+            <i class="bi bi-plus-lg me-1"></i> Add Opportunity
+        </a>
+    </div>
+</div>
+
+<!-- Search & Filter Controls -->
+<div class="card border-0 shadow-sm mb-4">
+    <div class="card-body p-3">
+        <form method="get" asp-action="Index" class="row g-2 align-items-center">
+            <div class="col-md-5">
+                <div class="input-group input-group-sm">
+                    <span class="input-group-text bg-light text-muted"><i class="bi bi-search"></i></span>
+                    <input type="text" name="searchTerm" value="@ViewBag.SearchTerm" class="form-control" placeholder="Search opportunity name or customer..." />
+                </div>
+            </div>
+            <div class="col-md-3">
+                <select name="stageFilter" class="form-select form-select-sm">
+                    <option value="">-- All Stages --</option>
+                    <option value="Qualification" selected="@(ViewBag.StageFilter == "Qualification")">Qualification</option>
+                    <option value="Proposal" selected="@(ViewBag.StageFilter == "Proposal")">Proposal</option>
+                    <option value="Negotiation" selected="@(ViewBag.StageFilter == "Negotiation")">Negotiation</option>
+                    <option value="Won" selected="@(ViewBag.StageFilter == "Won")">Won</option>
+                    <option value="Lost" selected="@(ViewBag.StageFilter == "Lost")">Lost</option>
+                </select>
+            </div>
+            <div class="col-md-4 d-flex gap-2">
+                <button type="submit" class="btn btn-sm btn-primary px-3 fw-semibold"><i class="bi bi-funnel-fill me-1"></i> Filter</button>
+                <a href="@Url.Action("Index")" class="btn btn-sm btn-outline-secondary px-3">Reset</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Opportunity Data Table -->
+<div class="card border-0 shadow-sm">
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th>Opportunity Name</th>
+                    <th>Customer / Lead</th>
+                    <th>Amount ($)</th>
+                    <th>Stage</th>
+                    <th>Probability</th>
+                    <th>Weighted Value</th>
+                    <th>Expected Close</th>
+                    <th>Owner</th>
+                    <th class="text-end">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (!Model.Any())
+                {
+                    <tr>
+                        <td colspan="9" class="text-center py-4 text-muted">
+                            <i class="bi bi-inbox fs-3 d-block mb-1"></i>
+                            No sales opportunities found.
+                        </td>
+                    </tr>
+                }
+                else
+                {
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            <td class="fw-semibold">@item.OpportunityName</td>
+                            <td>
+                                @if (item.Customer != null)
+                                {
+                                    <span class="badge bg-light text-dark"><i class="bi bi-building me-1"></i> @item.Customer.CustomerName</span>
+                                }
+                                else if (item.Lead != null)
+                                {
+                                    <span class="badge bg-light text-dark"><i class="bi bi-person me-1"></i> @item.Lead.LeadName</span>
+                                }
+                                else
+                                {
+                                    <span class="text-muted small">N/A</span>
+                                }
+                            </td>
+                            <td class="fw-bold text-dark">@item.Amount.ToString("C0")</td>
+                            <td>
+                                @if (item.Stage == "Won")
+                                {
+                                    <span class="badge bg-success-subtle text-success border border-success-subtle">Won</span>
+                                }
+                                else if (item.Stage == "Lost")
+                                {
+                                    <span class="badge bg-danger-subtle text-danger border border-danger-subtle">Lost</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-primary-subtle text-primary">@item.Stage</span>
+                                }
+                            </td>
+                            <td><span class="fw-semibold">@item.Probability%</span></td>
+                            <td class="fw-bold text-success">@item.WeightedPipeline.ToString("C0")</td>
+                            <td class="small">
+                                @item.ExpectedCloseDate.ToString("MMM dd, yyyy")
+                                @if (item.Status == "Active" && item.ExpectedCloseDate.Date < DateTime.Today)
+                                {
+                                    <span class="badge bg-danger ms-1" title="Overdue">Past Due</span>
+                                }
+                            </td>
+                            <td class="small">@(item.Owner?.FullName ?? "Unassigned")</td>
+                            <td class="text-end">
+                                <div class="btn-group btn-group-sm">
+                                    <a href="@Url.Action("Edit", new { id = item.OpportunityId })" class="btn btn-outline-primary" title="Edit Opportunity"><i class="bi bi-pencil"></i></a>
+                                    <button type="button" class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteModal-@item.OpportunityId" title="Delete"><i class="bi bi-trash"></i></button>
+                                </div>
+
+                                <!-- Delete Confirmation Modal -->
+                                <div class="modal fade text-start" id="deleteModal-@item.OpportunityId" tabindex="-1">
+                                    <div class="modal-dialog modal-dialog-centered">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title fw-bold text-danger"><i class="bi bi-exclamation-triangle-fill me-2"></i> Delete Opportunity</h5>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                            </div>
+                                            <div class="modal-body">
+                                                Are you sure you want to delete opportunity <strong>@item.OpportunityName</strong>?
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
+                                                <form asp-action="Delete" asp-route-id="@item.OpportunityId" method="post">
+                                                    @Html.AntiForgeryToken()
+                                                    <button type="submit" class="btn btn-danger">Confirm Delete</button>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
